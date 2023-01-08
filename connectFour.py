@@ -35,10 +35,16 @@ def get_row(board, col):
 # flips the board to drop all piaces to the bottom
 def print_board(board):
     print("-----------------------------")
-    print(numpy.flip(board, 0))
-    print("  0 1 2 3 4 5 6 7")
+    temp=numpy.flip(board, 0).copy()
+    for row in range(ROW_COUNT):
+        print("|", end=" ")
+        for col in range(COL_COUNT):
+            print(temp[row][col], end=" ")
+        print("|")
 
-    # function for finding playable locations
+    print("  0 1 2 3 4 5 6 7")
+    print("-----------------------------")
+
 
 
 def possible_drop_locations(board):
@@ -50,12 +56,13 @@ def possible_drop_locations(board):
     
 # check the game is won or not, give different name to this function
 def check_winner(board):
+    print("check_winner")
 
     players = {1,2}
 
 
     for piece in players:
-        print ("checking for player",piece)
+        
         # vertical four check
         for col in range(COL_COUNT):
             for row in range(ROW_COUNT-3):            
@@ -85,8 +92,8 @@ def check_winner(board):
     if len(possible_drop_locations(board)) <= 0:
         return True, 0
     else:
-        return False, 0
-        
+        return False, -1
+
 # change turn function
 def change_turn(turn):
     turn += 1
@@ -132,6 +139,7 @@ def get_human_input(turn):
 # Huristic ideas
 
 '''
+-----------------------------------------------------------------------------
 H1:
         finds consequtive pieces same color  for all directions  as vertical, horizontal, diagonal, negative diagonal, then sum the score of them 
 
@@ -146,17 +154,23 @@ H1:
 
          score = playerI_two_score + playerI_three_score + playerI_four_score - 
                  player2_two_score - player2_three_score - player2_four_score
-
+--------------------------------------------------------------------------------
 H2:
     give more weight to the center columns
-    create a matrix for weights for each index , then check the board for palyers pieces and add the weights to the score
-    [3, 4, 5, 7, 5, 4, 3],
-    [4, 6, 8, 10, 8, 6, 4],
-    [5, 8, 11, 13, 11, 8, 5],
-    [5, 8, 11, 13, 11, 8, 5],
-    [4, 6, 8, 10, 8, 6, 4],
-    [3, 4, 5, 7, 5, 4, 3]
+    create a matrix for weights for each index , then check the board for players pieces and add the weights to the score
+ [
+ [3, 4, 5, 7, 5, 4, 4, 3 ],
+ [4, 6, 7, 8, 7, 6, 4, 4 ],
+ [5, 7, 8, 9, 8, 7, 5, 5 ],
+ [7, 8, 9, 10,9, 8, 7, 7 ] ,
+ [5, 7, 8, 9, 8, 7, 5, 5 ],
+ [4, 6, 7, 8, 7, 6, 4, 4 ],
+ [3, 4, 5, 7, 5, 4, 4, 3 ] ]
 
+
+
+
+----------------------------------------------------------------------------------
 H3:
 
     combine H1 and H2
@@ -172,20 +186,26 @@ H3:
 
 
 weight_matrix = [
-    [3, 4, 5, 7, 5, 4, 3],
-    [4, 6, 8, 10, 8, 6, 4],
-    [5, 8, 11, 13, 11, 8, 5],
-    [5, 8, 11, 13, 11, 8, 5],
-    [4, 6, 8, 10, 8, 6, 4],
-    [3, 4, 5, 7, 5, 4, 3]
-]
+    [3, 4, 5, 7, 6, 5, 4, 3],
+    [4, 6, 8, 10, 10, 8, 6, 4],
+    [5, 8, 11, 13, 13, 11, 8, 5],
+    [7, 10, 13, 16, 16, 13, 10, 7],
+    [5, 8, 11, 13, 13, 11, 8, 5],
+    [4, 6, 8, 10, 10, 8, 6, 4],
+    [3, 4, 5, 7, 6, 5, 4, 3]
+    ]
+
 
 def huristic_2(board, piece):
     print("huristic_2")
+    score=0
     for col in range(COL_COUNT):
         for row in range(ROW_COUNT):
             if board[row][col] == piece:
                 score += weight_matrix[row][col]
+            else:
+                score -= weight_matrix[row][col]
+    
     return score
     
 
@@ -218,9 +238,9 @@ def select_huristic( ):
 
 # minimax algorithm
 def minimax(board, depth,maximizingPlayer,huristic_type):
-    # playable locations
+    
     playable_locations = possible_drop_locations(board)
-    print("playable_locations: ", playable_locations)
+        
 
     # Check if game is over or not
     is_terminal, winner = check_winner(board)
@@ -248,9 +268,12 @@ def minimax(board, depth,maximizingPlayer,huristic_type):
             #    return (None, huristic_3(board, AI))
 
             return (None, huristic_2(board, AI))
+
     if maximizingPlayer:
         max_value = float("-inf")
+        
         column = random.choice(playable_locations)
+        
         for col in playable_locations:
             row = get_row(board, col)
 
@@ -336,54 +359,62 @@ def human_vs_ai():
     board = create_board()
     is_game_over = False
     turn = 0
+    depth=4
     # select huristic type  
-    huristic = select_huristic(1)
+    huristic = select_huristic()
     print("huristic: ", huristic)
 
     # battle start human vs ai , human first
     print_board(board)
+
     while not is_game_over:
         name=get_player_name(turn)
 
         #  player 1 turn
         if turn == 0:
+            print("Human turn")
             col = get_human_input(turn)
 
             if is_playable(board, col):
                 row = get_row(board, col)
                 drop_piece(board, row, col, 1)
                 win_state, piece = check_winner(board)
-                if win_state:                      
+                turn = 1
+                if win_state and piece==1:                      
                     celebrate_winner(board, turn)                    
                     is_game_over=True
-
+            else:
+                print("Invalid move! Please try again.")
         #  player 2 (AI) turn
         else:
             # AI turn
-            col, minimax_score = minimax(board, 5, True, huristic)
+            print("AI turn")
+            
+            col, minimax_score = minimax(board, depth, True, huristic)
+
             if is_playable(board, col):
                 row = get_row(board, col)
                 drop_piece(board, row, col, 2)
+                turn = 0
                 win_state,piece = check_winner(board)
-                if win_state:
+                if win_state and piece==2:
                     celebrate_winner(board, turn)                    
                     is_game_over=True
 
         print_board(board) 
 
-        turn=change_turn(turn)
+        
     
    
 
 # AI VS AI
 
 
-
 def main():
 
     # after testing all functions below , create a menu for user to select game mode
-    human_vs_human()
-    #human_vs_ai()
+    #human_vs_human()
+    human_vs_ai()
     #ai_vs_ai()
 
 if __name__ == "__main__":
