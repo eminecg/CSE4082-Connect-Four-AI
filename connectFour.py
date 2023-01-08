@@ -51,11 +51,11 @@ def possible_drop_locations(board):
 # check the game is won or not, give different name to this function
 def check_winner(board):
 
-    players = [1,2]
+    players = {1,2}
 
 
     for piece in players:
-        
+        print ("checking for player",piece)
         # vertical four check
         for col in range(COL_COUNT):
             for row in range(ROW_COUNT-3):            
@@ -84,6 +84,9 @@ def check_winner(board):
 
     if len(possible_drop_locations(board)) <= 0:
         return True, 0
+    else:
+        return False, 0
+        
 # change turn function
 def change_turn(turn):
     turn += 1
@@ -291,6 +294,7 @@ def human_vs_human():
     board = create_board()
     is_game_over = False
     turn = 0
+    is_Draw = False
 
     print_board(board)
     while not is_game_over:
@@ -299,25 +303,34 @@ def human_vs_human():
         if turn == 0:
             col = get_human_input(turn)
             if is_playable(board, col):
-                row = get_next_open_row(board, col)
+                row = get_row(board, col)
                 drop_piece(board, row, col, 1)
-                if check_winner(board,1):                    
+                win_state,piece=check_winner(board)
+                if win_state and piece==1:                    
                     celebrate_winner(board, turn)                    
                     is_game_over=True
+                if win_state and piece==0:
+                    is_Draw=True                                                      
 
         #  player 2 turn
         else:
             col = get_human_input(turn)
             if is_playable(board, col):
-                row = get_next_open_row(board, col)
+                row = get_row(board, col)
                 drop_piece(board, row, col, 2)
-                if check_winner(board, 2):                    
+                win_state,piece=check_winner(board)
+                if win_state and piece==2:                    
                     celebrate_winner(board, turn)                    
                     is_game_over=True
+                if win_state and piece==0:
+                    is_Draw=True                                        
+        if is_Draw:
+            print("Draw!")
+            is_game_over=True
 
         print_board(board) 
-
         turn=change_turn(turn)
+
 # HUMAN VS AI
 def human_vs_ai():
     board = create_board()
@@ -339,7 +352,8 @@ def human_vs_ai():
             if is_playable(board, col):
                 row = get_row(board, col)
                 drop_piece(board, row, col, 1)
-                if check_winner(board,1):                    
+                win_state, piece = check_winner(board)
+                if win_state:                      
                     celebrate_winner(board, turn)                    
                     is_game_over=True
 
@@ -350,7 +364,8 @@ def human_vs_ai():
             if is_playable(board, col):
                 row = get_row(board, col)
                 drop_piece(board, row, col, 2)
-                if check_winner(board, 2):                    
+                win_state,piece = check_winner(board)
+                if win_state:
                     celebrate_winner(board, turn)                    
                     is_game_over=True
 
@@ -367,8 +382,8 @@ def human_vs_ai():
 def main():
 
     # after testing all functions below , create a menu for user to select game mode
-    #human_vs_human()
-    human_vs_ai()
+    human_vs_human()
+    #human_vs_ai()
     #ai_vs_ai()
 
 if __name__ == "__main__":
