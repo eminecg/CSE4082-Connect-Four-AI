@@ -62,32 +62,36 @@ def check_winner(board):
         for col in range(COL_COUNT):
             for row in range(ROW_COUNT-3):            
                 if board[row][col] == piece and board[row+1][col] == piece and board[row+2][col] == piece and board[row+3][col] == piece:
-                    print_board(board)
                     print("vertical four check")
+                    print_board(board)
+                    print("............")
                     return True, piece
 
         # horizontal four check
         for col in range(COL_COUNT-3):
             for row in range(ROW_COUNT):
                 if board[row][col] == piece and board[row][col+1] == piece and board[row][col+2] == piece and board[row][col+3] == piece:
-                    print_board(board)
                     print("horizontal four check")
+                    print_board(board)
+                    print("............")
                     return True, piece
 
         # pozitive diagonal four check
         for col in range(COL_COUNT-3):
             for row in range(ROW_COUNT-3):
                 if board[row][col] == piece and board[row+1][col+1] == piece and board[row+2][col+2] == piece and board[row+3][col+3] == piece:
-                    print_board(board)
                     print("pozitive diagonal four check")
+                    print_board(board)
+                    print("............")
                     return True, piece
 
         # negative diagonal four check
         for col in range(COL_COUNT-3):
             for row in range(3, ROW_COUNT):
                 if board[row][col] == piece and board[row-1][col+1] == piece and board[row-2][col+2] == piece and board[row-3][col+3] == piece:
-                    print_board(board)
                     print("negative diagonal four check")
+                    print_board(board)
+                    print("............")
                     return True, piece       
     
     if len(possible_drop_locations(board)) <= 0:
@@ -112,10 +116,10 @@ def celebrate_winner(board, turn):
     print("***************")
 
 # return name of the player 
-def get_player_name(p):
-    if p == 1:
+def get_player_name(turn):
+    if  turn==0:
         return "Player 1 "
-    elif p == 2:
+    else :
         return "Player 2 "
 
 
@@ -136,7 +140,7 @@ def get_human_input(turn):
             print("\nInvalid input! Please try again.\n")
 
 
-# Huristic ideas
+# heuristic ideas
 
 '''
 -----------------------------------------------------------------------------
@@ -189,7 +193,7 @@ def calculate_consequtives_score(board, piece):
 
     score = 0
 
-    #print("huristic_1")
+    #print("heuristic_1")
     # steps
 
     # step 1 ---------------------------------------------------------------------
@@ -201,15 +205,15 @@ def calculate_consequtives_score(board, piece):
     three_connected_pieces_indexes = []
 
 
-    for col in range(COL_COUNT-1):
-        for row in range(ROW_COUNT-1):
-            if board[row][col] == piece:
-                not_connected_pieces += 1
-                not_connected_pieces_indexes.append((row, col))
+   #for col in range(COL_COUNT-1):
+   #    for row in range(ROW_COUNT-1):
+   #        if board[row][col] == piece:
+   #            not_connected_pieces += 1
+   #            not_connected_pieces_indexes.append((row, col))
 
-    #print("not_connected_pieces:", not_connected_pieces)
+   ##print("not_connected_pieces:", not_connected_pieces)
 
-    score += not_connected_pieces * 10
+   #score += not_connected_pieces * 10
 
     # step 2 ----------------------------------------------------------------------------
     # calculate consequetive 2 pieces , multiply number of occurence by 100
@@ -336,7 +340,7 @@ def other_player(piece):
             other_piece = player
     return other_piece
 
-def  huristic_1(board, piece):
+def  heuristic_1(board, piece):
     
     other_piece=other_player(piece)
 
@@ -348,7 +352,7 @@ def  huristic_1(board, piece):
     return score
 
 
-def huristic_2(board, piece):
+def heuristic_2(board, piece):
     
     score=0
     for col in range(COL_COUNT):
@@ -367,8 +371,8 @@ def huristic_2(board, piece):
 
     return score
 
-# huristic function 3
-def huristic_3(board, piece):
+# heuristic function 3
+def heuristic_3(board, piece):
      
     other_piece=other_player(piece)
 
@@ -407,23 +411,23 @@ def get_center_score(connect_pieces_indexes, num_of_pieces):
     return center_score
 
 
-def select_huristic( ):    
+def select_heuristic( ):    
     while True:
-        huristic = int(input("Select huristic function (1-3): "))
+        heuristic = int(input("Select heuristic function (1-3): "))
         
-        if huristic == 1:
-            return  "huristic_1"
-        elif huristic == 2:
-            return "huristic_2"
-        elif huristic == 3:
-            return "huristic_3"
+        if heuristic == 1:
+            return  "heuristic_1"
+        elif heuristic == 2:
+            return "heuristic_2"
+        elif heuristic == 3:
+            return "heuristic_3"
         else:
             print("Invalid input! Please try again.")
 
     
 
 # minimax algorithm
-def minimax(board, depth,maximizingPlayer,huristic_type):
+def minimax(board, depth,maximizingPlayer,heuristic_type):
     
     playable_locations = possible_drop_locations(board)
         
@@ -442,19 +446,19 @@ def minimax(board, depth,maximizingPlayer,huristic_type):
                 # If no one win ,return 0 score
                 return (None, 0)
         else:
-            # huristic selection part
+            # heuristic selection part
 
             # If depth equals 0 return evaluation score
-            #if huristic_type == "huristic_1":
-            #    return (None, huristic_1(board, AI))
-            #elif huristic_type == "huristic_2":
-            #    return (None, huristic_2(board, AI))
-            #elif huristic_type == "huristic_3":
-            #    return (None, huristic_3(board, AI))
+            #if heuristic_type == "heuristic_1":
+            #    return (None, heuristic_1(board, AI))
+            #elif heuristic_type == "heuristic_2":
+            #    return (None, heuristic_2(board, AI))
+            #elif heuristic_type == "heuristic_3":
+            #    return (None, heuristic_3(board, AI))
 
-            #return (None, huristic_2(board, AI))
-            return (None, huristic_2(board, AI))
-            #return (None, huristic_3(board, AI))
+            return (None, heuristic_1(board, AI))
+            #return (None, heuristic_2(board, AI))
+            #return (None, heuristic_3(board, AI))
 
     if maximizingPlayer:
         max_value = float("-inf")
@@ -474,7 +478,7 @@ def minimax(board, depth,maximizingPlayer,huristic_type):
             drop_piece(temp_board, row, col, AI)
 
             # until terminal or deepest board state
-            current_score = minimax(temp_board, depth-1, False,huristic_type)[1]
+            current_score = minimax(temp_board, depth-1, False,heuristic_type)[1]
             
             if current_score > max_value:
                 value = current_score
@@ -498,7 +502,7 @@ def minimax(board, depth,maximizingPlayer,huristic_type):
             drop_piece(temp_board, row, col, PLAYER)
 
             #until terminal or deepest board state
-            current_score = minimax(temp_board, depth-1, True,huristic_type)[1]
+            current_score = minimax(temp_board, depth-1, True,heuristic_type)[1]
 
             if current_score < min_value:
                 value = current_score
@@ -553,11 +557,11 @@ def human_vs_ai():
     is_game_over = False
     turn = 0
     depth=4
-    # select huristic type  
-    huristic_AI=select_huristic()
+    # select heuristic type  
+    heuristic_AI=select_heuristic()
     number_of_moves=0
 
-    print( "Huristic function: "+huristic_AI)
+    print( "heuristic function: ",heuristic_AI)
     
 
     # battle start human vs ai , human first
@@ -587,7 +591,7 @@ def human_vs_ai():
             # AI turn
             print("AI turn")
             
-            col, minimax_score = minimax(board, depth, True, huristic_AI)
+            col, minimax_score = minimax(board, depth, True, heuristic_AI)
 
             if is_playable(board, col):
                 row = get_row(board, col)
@@ -601,22 +605,21 @@ def human_vs_ai():
         print_board(board) 
 
     print("---------------------------")
-    print("Number of moves: ",number_of_moves,"\nDept: ",depth,"\nHuristic of AI 1: ",huristic_AI)
+    print("Number of moves: ",number_of_moves,"\nDept: ",depth,"\nheuristic of AI 1: ",heuristic_AI)
 # AI VS AI
 def ai_vs_ai():
     board = create_board()
     is_game_over = False
     turn = 0
     depth=1
-    # select huristic type  
-    huristic_AI_1 = select_huristic()
-    huristic_AI_2 = select_huristic()
+    # select heuristic type  
 
-    print("AI 1 huristic: ", huristic_AI_1, " AI 2 huristic: ", huristic_AI_2)
+    heuristic_AI_1 = select_heuristic()
+    heuristic_AI_2 = select_heuristic()
+    print("AI 1 heuristic: ", heuristic_AI_1, " AI 2 heuristic: ", heuristic_AI_2)
 
     number_of_moves=0
     
-
     # battle start human vs ai , human first
     print_board(board)
 
@@ -629,7 +632,7 @@ def ai_vs_ai():
         if turn == 0:
             print("AI 1 turn")
             
-            col, minimax_score = minimax(board, depth, True, huristic_AI_1)
+            col, minimax_score = minimax(board, depth, True, heuristic_AI_1)
 
             if is_playable(board, col):
                 row = get_row(board, col)
@@ -645,7 +648,7 @@ def ai_vs_ai():
             # AI turn
             print("AI 2 turn")
             
-            col, minimax_score = minimax(board, depth, True, huristic_AI_2)
+            col, minimax_score = minimax(board, depth, True, heuristic_AI_2)
 
             if is_playable(board, col):
                 row = get_row(board, col)
@@ -659,15 +662,15 @@ def ai_vs_ai():
         print_board(board)
     
     print("---------------------------")
-    print("Number of moves: ",number_of_moves,"\nDept: ",depth,"\nHuristic of AI 1: ",huristic_AI_1,"\nHuristic of AI 2: ",huristic_AI_2)
+    print("Number of moves: ",number_of_moves,"\nDept: ",depth,"\nheuristic of AI 1: ",heuristic_AI_1,"\nheuristic of AI 2: ",heuristic_AI_2)
     
 
 def main():
 
     # after testing all functions below , create a menu for user to select game mode
     #human_vs_human()
-    #human_vs_ai()
-    ai_vs_ai()
+    human_vs_ai()
+    #ai_vs_ai()
 
 if __name__ == "__main__":
     main()
