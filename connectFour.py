@@ -401,7 +401,7 @@ def check_win_state(board):
     
 
 # minimax algorithm
-def minimax(board, depth,maximizingPlayer,heuristic_type):
+def minimax(board, depth,maximizingPlayer,heuristic_type,alfa,beta):
     
     playable_locations = possible_drop_locations(board)
         
@@ -413,10 +413,10 @@ def minimax(board, depth,maximizingPlayer,heuristic_type):
         if is_four:
             
             if winner == PLAYER_1:
-                return (None, float("inf"))
+                return (None, 1000000)
             
             elif winner == PLAYER_2:
-                return (None, float("-inf"))
+                return (None, -1000000)
             else:
                 # no winner , return 0 score
                 return (None, 0)
@@ -453,12 +453,14 @@ def minimax(board, depth,maximizingPlayer,heuristic_type):
             drop_piece(temp_board, row, col, PLAYER_1)
 
             # until terminal or deepest board state
-            current_score = minimax(temp_board, depth-1, False,heuristic_type)[1]
+            current_score = minimax(temp_board, depth-1, False,heuristic_type,alfa,beta)[1]
             
             if current_score > max_value:
                 value = current_score
                 column = col
-           
+            alpha=max(alfa,current_score)
+            if beta <= alpha:
+                break
         return column, value
 
     else:
@@ -477,15 +479,18 @@ def minimax(board, depth,maximizingPlayer,heuristic_type):
             drop_piece(temp_board, row, col, PLAYER_2)
 
             #until terminal or deepest board state
-            current_score = minimax(temp_board, depth-1, True,heuristic_type)[1]
+            current_score = minimax(temp_board, depth-1, True,heuristic_type,alpha,beta)[1]
 
             if current_score < min_value:
                 value = current_score
                 column = col            
+            beta=min(beta,current_score)
+            if beta <= alpha:
+                break
         return column, value       
 
 
-def minimax_2(board, depth, maximizingPlayer, heuristic_type):
+def minimax_2(board, depth, maximizingPlayer, heuristic_type,alpha,beta):
 
     playable_locations = possible_drop_locations(board)
 
@@ -497,10 +502,10 @@ def minimax_2(board, depth, maximizingPlayer, heuristic_type):
         if is_four:
 
             if winner == PLAYER_2:
-                return (None, float("inf"))
+                return (None, 1000000)
 
             elif winner == PLAYER_1:
-                return (None, float("-inf"))
+                return (None, -1000000)
             else:
                 # no winner , return 0 score
                 return (None, 0)
@@ -537,13 +542,14 @@ def minimax_2(board, depth, maximizingPlayer, heuristic_type):
             drop_piece(temp_board, row, col, PLAYER_2)
 
             # until terminal or deepest board state
-            current_score = minimax_2(
-                temp_board, depth-1, False, heuristic_type)[1]
+            current_score = minimax_2(temp_board, depth-1, False, heuristic_type,alpha,beta)[1]
 
             if current_score > max_value:
                 value = current_score
                 column = col
-
+            alpha=max(alpha,current_score)
+            if beta <= alpha:
+                break
         return column, value
 
     else:
@@ -563,11 +569,14 @@ def minimax_2(board, depth, maximizingPlayer, heuristic_type):
 
             #until terminal or deepest board state
             current_score = minimax_2(
-                temp_board, depth-1, True, heuristic_type)[1]
+                temp_board, depth-1, True, heuristic_type,alpha,beta)[1]
 
             if current_score < min_value:
                 value = current_score
                 column = col
+            beta=min(beta,current_score)
+            if beta <= alpha:
+                break
         return column, value
 
 
@@ -619,7 +628,7 @@ def human_vs_ai():
     board = create_board()
     is_game_over = False
     turn = 0
-    depth=4
+    depth=5
     # select heuristic type  
     heuristic_AI=select_heuristic()
     number_of_moves=0
@@ -654,7 +663,7 @@ def human_vs_ai():
             # AI turn
             print("AI turn")
             
-            col, minimax_score = minimax_2(board, depth, True, heuristic_AI)
+            col, minimax_score = minimax_2(board, depth, True, heuristic_AI,-math.inf, math.inf)
 
             if is_playable(board, col):
                 row = get_row(board, col)
@@ -696,7 +705,7 @@ def ai_vs_ai():
         if turn == 0:
             print("AI 1 turn")
             
-            col, minimax_score = minimax(board, depth, True, heuristic_AI_1)
+            col, minimax_score = minimax(board, depth, True, heuristic_AI_1,-math.inf, math.inf)
 
             if is_playable(board, col):
                 row = get_row(board, col)
@@ -712,7 +721,7 @@ def ai_vs_ai():
             # AI turn
             print("AI 2 turn")
             
-            col, minimax_score = minimax_2(board, depth, True, heuristic_AI_2) # AI 2 is max player
+            col, minimax_score = minimax_2(board, depth, True, heuristic_AI_2,-math.inf, math.inf) # AI 2 is max player
 
             if is_playable(board, col):
                 row = get_row(board, col)
