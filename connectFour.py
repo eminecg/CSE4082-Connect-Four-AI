@@ -23,7 +23,8 @@ def drop_piece(board, row, col, piece):     # drop_piece
 
 def is_playable(board, col):    # playable_location_control
     # if location is 0 this means it is valid
-    return board[ROW_COUNT-1][col] == 0
+    isPlayable=board[ROW_COUNT-1][col] == 0    
+    return isPlayable
 
 
 def get_row(board, col):
@@ -34,18 +35,16 @@ def get_row(board, col):
 
 # flips the board to drop all piaces to the bottom
 def print_board(board):
-    print("-----------------------------")
+    print("-------------------")
     temp=numpy.flip(board, 0).copy()
     for row in range(ROW_COUNT):
         print("|", end=" ")
         for col in range(COL_COUNT):
             print(temp[row][col], end=" ")
         print("|")
-
+    print("-------------------")
     print("  0 1 2 3 4 5 6 7")
-    print("-----------------------------")
-
-
+    print("")
 
 def possible_drop_locations(board):
     playable_locations = []
@@ -56,39 +55,41 @@ def possible_drop_locations(board):
     
 # check the game is won or not, give different name to this function
 def check_winner(board):
-    print("check_winner")
-
-    players = {1,2}
-
-
+    players = {1, 2}
     for piece in players:
         
         # vertical four check
         for col in range(COL_COUNT):
             for row in range(ROW_COUNT-3):            
                 if board[row][col] == piece and board[row+1][col] == piece and board[row+2][col] == piece and board[row+3][col] == piece:
+                    print_board(board)
+                    print("vertical four check")
                     return True, piece
-
 
         # horizontal four check
         for col in range(COL_COUNT-3):
             for row in range(ROW_COUNT):
                 if board[row][col] == piece and board[row][col+1] == piece and board[row][col+2] == piece and board[row][col+3] == piece:
+                    print_board(board)
+                    print("horizontal four check")
                     return True, piece
 
         # pozitive diagonal four check
         for col in range(COL_COUNT-3):
             for row in range(ROW_COUNT-3):
                 if board[row][col] == piece and board[row+1][col+1] == piece and board[row+2][col+2] == piece and board[row+3][col+3] == piece:
+                    print_board(board)
+                    print("pozitive diagonal four check")
                     return True, piece
 
         # negative diagonal four check
         for col in range(COL_COUNT-3):
             for row in range(3, ROW_COUNT):
                 if board[row][col] == piece and board[row-1][col+1] == piece and board[row-2][col+2] == piece and board[row-3][col+3] == piece:
+                    print_board(board)
+                    print("negative diagonal four check")
                     return True, piece       
-    print("No winner")
-
+    
     if len(possible_drop_locations(board)) <= 0:
         return True, 0
     else:
@@ -99,10 +100,9 @@ def change_turn(turn):
     turn += 1
     turn = turn % 2  ##for which player is turn
 
-    print("current turn:",turn)
+    #print("current turn:",turn)
 
     return turn
-
 
 # funtion for celebrating the winner
 def celebrate_winner(board, turn):
@@ -112,10 +112,10 @@ def celebrate_winner(board, turn):
     print("***************")
 
 # return name of the player 
-def get_player_name(turn):
-    if turn == 0:
+def get_player_name(p):
+    if p == 1:
         return "Player 1 "
-    else:
+    elif p == 2:
         return "Player 2 "
 
 
@@ -167,55 +167,245 @@ H2:
  [4, 6, 7, 8, 7, 6, 4, 4 ],
  [3, 4, 5, 7, 5, 4, 4, 3 ] ]
 
-
-
-
 ----------------------------------------------------------------------------------
 H3:
 
-    combine H1 and H2
-    sum all the socre 
-    return the score
-
-    or 
-
-    find the max score of H1 and H2
-    return the max score
-
 '''
 
-
 weight_matrix = [
-    [3, 4, 5, 7, 6, 5, 4, 3],
-    [4, 6, 8, 10, 10, 8, 6, 4],
-    [5, 8, 11, 13, 13, 11, 8, 5],
-    [7, 10, 13, 16, 16, 13, 10, 7],
-    [5, 8, 11, 13, 13, 11, 8, 5],
-    [4, 6, 8, 10, 10, 8, 6, 4],
-    [3, 4, 5, 7, 6, 5, 4, 3]
+    [30, 40, 50, 70, 60, 50, 40, 30],
+    [40, 60, 80, 100, 100, 80, 60, 40],
+    [50, 80, 110, 130, 130, 110, 80, 50],
+    [70, 100, 130, 160, 160, 130, 100, 70],
+    [50, 80, 110, 130, 130, 110, 80, 50],
+    [40, 60, 80, 100, 100, 80, 60, 40],
+    [30, 40, 50, 70, 60, 50, 40, 30],
     ]
 
 
+
+
+def calculate_consequtives_score(board, piece):
+
+    score = 0
+
+    #print("huristic_1")
+    # steps
+
+    # step 1 ---------------------------------------------------------------------
+    # calculate 1 pieces exist not consequtive, multiply number of occurence by 10
+
+    not_connected_pieces = 0
+    not_connected_pieces_indexes =   []
+    two_connected_pieces_indexes =   []
+    three_connected_pieces_indexes = []
+
+
+    for col in range(COL_COUNT-1):
+        for row in range(ROW_COUNT-1):
+            if board[row][col] == piece:
+                not_connected_pieces += 1
+                not_connected_pieces_indexes.append((row, col))
+
+    #print("not_connected_pieces:", not_connected_pieces)
+
+    score += not_connected_pieces * 10
+
+    # step 2 ----------------------------------------------------------------------------
+    # calculate consequetive 2 pieces , multiply number of occurence by 100
+    
+    
+    # on vertical direction
+    connected_pieces = 0
+    for col in range(COL_COUNT-1):
+        for row in range(ROW_COUNT-2):
+            if board[row][col] == piece and board[row+1][col] == piece:
+                connected_pieces += 1
+                two_connected_pieces_indexes.append((row, col))
+                
+
+    #print("connected_pieces_2_vertical:", connected_pieces)
+
+    # on horizontal direction
+    for col in range(COL_COUNT-2):
+        for row in range(ROW_COUNT-1):
+            if board[row][col] == piece and board[row][col+1] == piece:
+                connected_pieces += 1
+                two_connected_pieces_indexes.append((row, col))
+
+    #print("connected_pieces_2_horizontal:", connected_pieces)
+
+    # on diagonal direction
+    for col in range(COL_COUNT-2):
+        for row in range(ROW_COUNT-2):
+            if board[row][col] == piece and board[row+1][col+1] == piece:
+                connected_pieces += 1
+                two_connected_pieces_indexes.append((row, col))
+
+    #print("connected_pieces_2_diagonal:", connected_pieces)
+
+    # on negative diagonal direction
+    for col in range(1, COL_COUNT-1):
+        for row in range(1, ROW_COUNT-1):
+            if board[row-1][col-1] == piece and board[row][col] == piece:
+                connected_pieces += 1
+                two_connected_pieces_indexes.append((row, col))
+
+    #print("connected_pieces_2_negative_diagonal:", connected_pieces)
+
+    score += connected_pieces * 100
+
+    # step 3 ------------------------------------------------------------------------------
+    # calculate consequetive 3 pieces , multiply number of occurence by 1000    
+    connected_pieces = 0
+    # on vertical direction
+    for col in range(COL_COUNT-1):
+        for row in range(ROW_COUNT-3):
+            if board[row][col] == piece and board[row+1][col] == piece and board[row+2][col] == piece:
+                connected_pieces += 1
+                three_connected_pieces_indexes.append((row, col))
+
+    #print("connected_pieces_3_vertical:", connected_pieces)
+
+    # on horizontal direction
+    for col in range(COL_COUNT-3):
+        for row in range(ROW_COUNT-1):
+            if board[row][col] == piece and board[row][col+1] == piece and board[row][col+2] == piece:
+                connected_pieces += 1
+                three_connected_pieces_indexes.append((row, col))
+    #print("connected_pieces_3_horizontal:", connected_pieces)
+
+    # on diagonal direction
+    for col in range(COL_COUNT-3):
+        for row in range(ROW_COUNT-3):
+            if board[row][col] == piece and board[row+1][col+1] == piece and board[row+2][col+2] == piece:
+                connected_pieces += 1
+                three_connected_pieces_indexes.append((row, col))
+    #print("connected_pieces_3_diagonal:", connected_pieces)
+
+    # on negative diagonal direction
+    for col in range(2, COL_COUNT-1):
+        for row in range(2, ROW_COUNT-1):
+            if board[row-2][col-2] == piece and board[row-1][col-1] == piece and board[row][col] == piece:
+                connected_pieces += 1
+                three_connected_pieces_indexes.append((row, col))
+
+    #print("connected_pieces_3_negative_diagonal:", connected_pieces)
+    score += connected_pieces * 1000
+
+    #print("piece : ", piece, "score : ", score)
+
+    # step 4 ------------------------------------------------------------------------------
+    # calculate consequetive 4 pieces , multiply number of occurence by 10000
+    connected_pieces = 0
+    # on vertical direction
+    for col in range(COL_COUNT-1):
+        for row in range(ROW_COUNT-4):
+            if board[row][col] == piece and board[row+1][col] == piece and board[row+2][col] == piece and board[row+3][col] == piece:
+                connected_pieces += 1
+    
+    # on horizontal direction
+    for col in range(COL_COUNT-4):
+        for row in range(ROW_COUNT-1):
+            if board[row][col] == piece and board[row][col+1] == piece and board[row][col+2] == piece and board[row][col+3] == piece:
+                connected_pieces += 1
+
+    # on diagonal direction
+    for col in range(COL_COUNT-4):
+        for row in range(ROW_COUNT-4):
+            if board[row][col] == piece and board[row+1][col+1] == piece and board[row+2][col+2] == piece and board[row+3][col+3] == piece:
+                connected_pieces += 1
+
+    # on negative diagonal direction
+    for col in range(3, COL_COUNT-1):
+        for row in range(3, ROW_COUNT-1):
+            if board[row-3][col-3] == piece and board[row-2][col-2] == piece and board[row-1][col-1] == piece and board[row][col] == piece:
+                connected_pieces += 1
+    
+    score += connected_pieces * 100000000
+    
+
+    return score,not_connected_pieces_indexes,two_connected_pieces_indexes,three_connected_pieces_indexes
+
+def other_player(piece):
+    players= {1,2}
+    other_piece=-1
+
+    for player in players:
+        if player != piece:
+            other_piece = player
+    return other_piece
+
+def  huristic_1(board, piece):
+    
+    other_piece=other_player(piece)
+
+    max_player_score=calculate_consequtives_score(board,piece)[0]
+    min_player_score=calculate_consequtives_score(board,other_piece)[0]
+
+    score=max_player_score-min_player_score
+    
+    return score
+
+
 def huristic_2(board, piece):
-    print("huristic_2")
+    
     score=0
     for col in range(COL_COUNT):
         for row in range(ROW_COUNT):
             if board[row][col] == piece:
                 score += weight_matrix[row][col]
             else:
-                score -= weight_matrix[row][col]
+                score -= weight_matrix[row][col]        
     
+    other_piece=other_player(piece)
+
+    max_player_score=calculate_consequtives_score(board,piece)[0]
+    min_player_score=calculate_consequtives_score(board,other_piece)[0]
+
+    score+=(max_player_score-min_player_score)
+
     return score
-    
 
-
-def  huristic_1(board, piece):
-    print("huristic_1")
-
-
+# huristic function 3
 def huristic_3(board, piece):
-    print("huristic_3")
+     
+    other_piece=other_player(piece)
+
+    max_player_score,not_connected_pieces,two_connected_pieces_indexes,three_connected_pieces_indexes=calculate_consequtives_score(board,piece)
+    min_player_score,other_not_connected_pieces,other_two_connected_pieces_indexes,other_three_connected_pieces_indexes=calculate_consequtives_score(board,other_piece)
+    
+    score=0
+    # check first if there is a 3 connected pieces
+    if len(three_connected_pieces_indexes) > 0:
+        max_player_score+=get_center_score(three_connected_pieces_indexes,3)
+    if len (other_three_connected_pieces_indexes) > 0:
+        min_player_score+=get_center_score(other_three_connected_pieces_indexes,3)
+    if len (two_connected_pieces_indexes) > 0:
+        max_player_score+=get_center_score(two_connected_pieces_indexes,2)
+    if len (other_two_connected_pieces_indexes) > 0:
+        min_player_score+=get_center_score(other_two_connected_pieces_indexes,2)
+    if len (not_connected_pieces) > 0:
+        max_player_score+=get_center_score(not_connected_pieces,1)
+    if len (other_not_connected_pieces) > 0:
+        min_player_score+=get_center_score(other_not_connected_pieces,1)
+
+    score=max_player_score-min_player_score
+    return score
+        
+
+# gets tuple list as input and return the center score
+def get_center_score(connect_pieces_indexes, num_of_pieces):
+    center_score = 0
+    extra_score = pow(10,num_of_pieces)
+
+    for index in connect_pieces_indexes:
+        if index[1] == 3 or index[1] == 4:
+            center_score += extra_score
+        if index[0] == 3 :
+            center_score += extra_score
+    return center_score
+
 
 def select_huristic( ):    
     while True:
@@ -229,24 +419,19 @@ def select_huristic( ):
             return "huristic_3"
         else:
             print("Invalid input! Please try again.")
-  
 
-
-#def huristic_2(board, piece):
-#def huristic__3(board, piece):        
-
+    
 
 # minimax algorithm
 def minimax(board, depth,maximizingPlayer,huristic_type):
     
     playable_locations = possible_drop_locations(board)
         
-
     # Check if game is over or not
-    is_terminal, winner = check_winner(board)
-    if depth == 0 or is_terminal:
-        # if game over
-        if is_terminal:
+    is_four, winner = check_winner(board)
+    if depth == 0 or is_four:
+        # if game overzz
+        if is_four:
             # If AI win return 1000000 score
             if winner == AI:
                 return (None, 1000000)
@@ -267,12 +452,17 @@ def minimax(board, depth,maximizingPlayer,huristic_type):
             #elif huristic_type == "huristic_3":
             #    return (None, huristic_3(board, AI))
 
+            #return (None, huristic_2(board, AI))
             return (None, huristic_2(board, AI))
+            #return (None, huristic_3(board, AI))
 
     if maximizingPlayer:
         max_value = float("-inf")
         
-        column = random.choice(playable_locations)
+        # column = random.choice(playable_locations)
+        random.shuffle(playable_locations)
+
+        column = playable_locations[0]
         
         for col in playable_locations:
             row = get_row(board, col)
@@ -293,8 +483,11 @@ def minimax(board, depth,maximizingPlayer,huristic_type):
         return column, value
 
     else:
-        value = float("inf")
-        column = random.choice(playable_locations)
+        min_value = float("inf")
+
+        #column = random.choice(playable_locations)
+        random.shuffle(playable_locations)
+        
         for col in playable_locations:
             row = get_row(board, col)
 
@@ -305,10 +498,10 @@ def minimax(board, depth,maximizingPlayer,huristic_type):
             drop_piece(temp_board, row, col, PLAYER)
 
             #until terminal or deepest board state
-            min_score = minimax(temp_board, depth-1, True,huristic_type)[1]
+            current_score = minimax(temp_board, depth-1, True,huristic_type)[1]
 
-            if min_score < value:
-                value = min_score
+            if current_score < min_value:
+                value = current_score
                 column = col            
         return column, value       
 
@@ -361,13 +554,17 @@ def human_vs_ai():
     turn = 0
     depth=4
     # select huristic type  
-    huristic = select_huristic()
-    print("huristic: ", huristic)
+    huristic_AI=select_huristic()
+    number_of_moves=0
+
+    print( "Huristic function: "+huristic_AI)
+    
 
     # battle start human vs ai , human first
     print_board(board)
 
     while not is_game_over:
+        number_of_moves+=1
         name=get_player_name(turn)
 
         #  player 1 turn
@@ -381,7 +578,7 @@ def human_vs_ai():
                 win_state, piece = check_winner(board)
                 turn = 1
                 if win_state and piece==1:                      
-                    celebrate_winner(board, turn)                    
+                    celebrate_winner(board,1)                    
                     is_game_over=True
             else:
                 print("Invalid move! Please try again.")
@@ -390,7 +587,7 @@ def human_vs_ai():
             # AI turn
             print("AI turn")
             
-            col, minimax_score = minimax(board, depth, True, huristic)
+            col, minimax_score = minimax(board, depth, True, huristic_AI)
 
             if is_playable(board, col):
                 row = get_row(board, col)
@@ -398,24 +595,79 @@ def human_vs_ai():
                 turn = 0
                 win_state,piece = check_winner(board)
                 if win_state and piece==2:
-                    celebrate_winner(board, turn)                    
+                    celebrate_winner(board, 2)                    
                     is_game_over=True
 
         print_board(board) 
 
-        
-    
-   
-
+    print("---------------------------")
+    print("Number of moves: ",number_of_moves,"\nDept: ",depth,"\nHuristic of AI 1: ",huristic_AI)
 # AI VS AI
+def ai_vs_ai():
+    board = create_board()
+    is_game_over = False
+    turn = 0
+    depth=1
+    # select huristic type  
+    huristic_AI_1 = select_huristic()
+    huristic_AI_2 = select_huristic()
 
+    print("AI 1 huristic: ", huristic_AI_1, " AI 2 huristic: ", huristic_AI_2)
+
+    number_of_moves=0
+    
+
+    # battle start human vs ai , human first
+    print_board(board)
+
+    while not is_game_over:
+        
+        number_of_moves+=1
+        name=get_player_name(turn)
+
+        #  player 1 turn
+        if turn == 0:
+            print("AI 1 turn")
+            
+            col, minimax_score = minimax(board, depth, True, huristic_AI_1)
+
+            if is_playable(board, col):
+                row = get_row(board, col)
+                drop_piece(board, row, col, 1)
+                turn = 1
+                win_state,piece = check_winner(board)
+                if win_state and piece==1:
+                    celebrate_winner(board, 1)                    
+                    is_game_over=True
+
+        #  player 2 (AI) turn
+        else:
+            # AI turn
+            print("AI 2 turn")
+            
+            col, minimax_score = minimax(board, depth, True, huristic_AI_2)
+
+            if is_playable(board, col):
+                row = get_row(board, col)
+                drop_piece(board, row, col, 2)
+                turn = 0
+                win_state,piece = check_winner(board)
+                if win_state and piece==2:
+                    celebrate_winner(board, 2)                    
+                    is_game_over=True
+
+        print_board(board)
+    
+    print("---------------------------")
+    print("Number of moves: ",number_of_moves,"\nDept: ",depth,"\nHuristic of AI 1: ",huristic_AI_1,"\nHuristic of AI 2: ",huristic_AI_2)
+    
 
 def main():
 
     # after testing all functions below , create a menu for user to select game mode
     #human_vs_human()
-    human_vs_ai()
-    #ai_vs_ai()
+    #human_vs_ai()
+    ai_vs_ai()
 
 if __name__ == "__main__":
     main()
