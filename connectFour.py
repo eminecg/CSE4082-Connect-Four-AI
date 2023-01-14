@@ -5,10 +5,10 @@ import sys
 import math
 
 
-PLAYER = 0
-AI = 1
-COL_COUNT = 8 # 7
-ROW_COUNT = 7 # 6
+PLAYER_1 = 1
+PLAYER_2 = 2
+COL_COUNT = 8 
+ROW_COUNT = 7 
 
 
 def create_board():  # create_game_board
@@ -54,45 +54,42 @@ def possible_drop_locations(board):
     return playable_locations
     
 # check the game is won or not, give different name to this function
-def check_winner(board):
-    players = {1, 2}
-    for piece in players:
-        
-        # vertical four check
-        for col in range(COL_COUNT):
-            for row in range(ROW_COUNT-3):            
-                if board[row][col] == piece and board[row+1][col] == piece and board[row+2][col] == piece and board[row+3][col] == piece:
-                    print("vertical four check")
-                    print_board(board)
-                    print("............")
-                    return True, piece
-
-        # horizontal four check
-        for col in range(COL_COUNT-3):
-            for row in range(ROW_COUNT):
-                if board[row][col] == piece and board[row][col+1] == piece and board[row][col+2] == piece and board[row][col+3] == piece:
-                    print("horizontal four check")
-                    print_board(board)
-                    print("............")
-                    return True, piece
-
-        # pozitive diagonal four check
-        for col in range(COL_COUNT-3):
-            for row in range(ROW_COUNT-3):
-                if board[row][col] == piece and board[row+1][col+1] == piece and board[row+2][col+2] == piece and board[row+3][col+3] == piece:
-                    print("pozitive diagonal four check")
-                    print_board(board)
-                    print("............")
-                    return True, piece
-
-        # negative diagonal four check
-        for col in range(COL_COUNT-3):
-            for row in range(3, ROW_COUNT):
-                if board[row][col] == piece and board[row-1][col+1] == piece and board[row-2][col+2] == piece and board[row-3][col+3] == piece:
-                    print("negative diagonal four check")
-                    print_board(board)
-                    print("............")
-                    return True, piece       
+def check_winner(board,piece):
+    
+    
+    
+    # vertical four check
+    for col in range(COL_COUNT):
+        for row in range(ROW_COUNT-3):            
+            if board[row][col] == piece and board[row+1][col] == piece and board[row+2][col] == piece and board[row+3][col] == piece:
+                print("vertical four check ",piece)
+                print_board(board)
+                print("............")
+                return True, piece
+    # horizontal four check
+    for col in range(COL_COUNT-3):
+        for row in range(ROW_COUNT):
+            if board[row][col] == piece and board[row][col+1] == piece and board[row][col+2] == piece and board[row][col+3] == piece:
+                print("horizontal four check",piece)
+                print_board(board)
+                print("............")
+                return True, piece
+    # pozitive diagonal four check
+    for col in range(COL_COUNT-3):
+        for row in range(ROW_COUNT-3):
+            if board[row][col] == piece and board[row+1][col+1] == piece and board[row+2][col+2] == piece and board[row+3][col+3] == piece:
+                print("pozitive diagonal four check",   piece)
+                print_board(board)
+                print("............")
+                return True, piece
+    # negative diagonal four check
+    for col in range(COL_COUNT-3):
+        for row in range(3, ROW_COUNT):
+            if board[row][col] == piece and board[row-1][col+1] == piece and board[row-2][col+2] == piece and board[row-3][col+3] == piece:
+                print("negative diagonal four check",   piece)
+                print_board(board)
+                print("............")
+                return True, piece       
     
     if len(possible_drop_locations(board)) <= 0:
         return True, 0
@@ -140,42 +137,6 @@ def get_human_input(turn):
             print("\nInvalid input! Please try again.\n")
 
 
-# heuristic ideas
-
-'''
------------------------------------------------------------------------------
-H1:
-        finds consequtive pieces same color  for all directions  as vertical, horizontal, diagonal, negative diagonal, then sum the score of them 
-
-    - 4 in a direction
-        sore = 100
-    - 3 in a direction with empty space
-        score = 5
-    - 2 in a direction with 2 empty space
-        score = 2        
-    - 1 in a direction with 3 empty space
-        score = 1
-
-         score = playerI_two_score + playerI_three_score + playerI_four_score - 
-                 player2_two_score - player2_three_score - player2_four_score
---------------------------------------------------------------------------------
-H2:
-    give more weight to the center columns
-    create a matrix for weights for each index , then check the board for players pieces and add the weights to the score
- [
- [3, 4, 5, 7, 5, 4, 4, 3 ],
- [4, 6, 7, 8, 7, 6, 4, 4 ],
- [5, 7, 8, 9, 8, 7, 5, 5 ],
- [7, 8, 9, 10,9, 8, 7, 7 ] ,
- [5, 7, 8, 9, 8, 7, 5, 5 ],
- [4, 6, 7, 8, 7, 6, 4, 4 ],
- [3, 4, 5, 7, 5, 4, 4, 3 ] ]
-
-----------------------------------------------------------------------------------
-H3:
-
-'''
-
 weight_matrix = [
     [30, 40, 50, 70, 60, 50, 40, 30],
     [40, 60, 80, 100, 100, 80, 60, 40],
@@ -185,9 +146,6 @@ weight_matrix = [
     [40, 60, 80, 100, 100, 80, 60, 40],
     [30, 40, 50, 70, 60, 50, 40, 30],
     ]
-
-
-
 
 def calculate_consequtives_score(board, piece):
 
@@ -425,6 +383,22 @@ def select_heuristic( ):
             print("Invalid input! Please try again.")
 
     
+def check_win_state(board):
+
+    is_win_1,player1=check_winner(board, PLAYER_1)
+    is_win_2,player2=check_winner(board, PLAYER_2)
+    
+
+    if is_win_1 :
+        print("Player 1 wins!")
+        return True,player1
+    elif is_win_2:
+        print("Player 2 wins!")
+        return True,player2
+    else:
+        
+        return False,0
+    
 
 # minimax algorithm
 def minimax(board, depth,maximizingPlayer,heuristic_type):
@@ -432,31 +406,32 @@ def minimax(board, depth,maximizingPlayer,heuristic_type):
     playable_locations = possible_drop_locations(board)
         
     # Check if game is over or not
-    is_four, winner = check_winner(board)
+    is_four,winner=check_win_state(board)   
+        
     if depth == 0 or is_four:
         # if game overzz
         if is_four:
-            # If AI win return 1000000 score
-            if winner == AI:
-                return (None, 1000000)
-            # If Player win return -1000000 score
-            elif winner == PLAYER:
-                return (None, -1000000)
+            
+            if winner == PLAYER_1:
+                return (None, float("inf"))
+            
+            elif winner == PLAYER_2:
+                return (None, float("-inf"))
             else:
-                # If no one win ,return 0 score
+                # no winner , return 0 score
                 return (None, 0)
         else:
             # heuristic selection part
 
-            # If depth equals 0 return evaluation score
-            #if heuristic_type == "heuristic_1":
-            #    return (None, heuristic_1(board, AI))
-            #elif heuristic_type == "heuristic_2":
-            #    return (None, heuristic_2(board, AI))
-            #elif heuristic_type == "heuristic_3":
-            #    return (None, heuristic_3(board, AI))
+            #If depth equals 0 return evaluation score
+            if heuristic_type == "heuristic_1":
+                return (None, heuristic_1(board, PLAYER_1))
+            elif heuristic_type == "heuristic_2":
+                return (None, heuristic_2(board, PLAYER_1))
+            elif heuristic_type == "heuristic_3":
+                return (None, heuristic_3(board, PLAYER_1))
 
-            return (None, heuristic_1(board, AI))
+            # return (None, heuristic_1(board, PLAYER_1))
             #return (None, heuristic_2(board, AI))
             #return (None, heuristic_3(board, AI))
 
@@ -475,7 +450,7 @@ def minimax(board, depth,maximizingPlayer,heuristic_type):
             temp_board = board.copy()
 
             # simulation
-            drop_piece(temp_board, row, col, AI)
+            drop_piece(temp_board, row, col, PLAYER_1)
 
             # until terminal or deepest board state
             current_score = minimax(temp_board, depth-1, False,heuristic_type)[1]
@@ -499,7 +474,7 @@ def minimax(board, depth,maximizingPlayer,heuristic_type):
             temp_board = board.copy()
 
             # simulation
-            drop_piece(temp_board, row, col, PLAYER)
+            drop_piece(temp_board, row, col, PLAYER_2)
 
             #until terminal or deepest board state
             current_score = minimax(temp_board, depth-1, True,heuristic_type)[1]
@@ -508,6 +483,94 @@ def minimax(board, depth,maximizingPlayer,heuristic_type):
                 value = current_score
                 column = col            
         return column, value       
+
+
+def minimax_2(board, depth, maximizingPlayer, heuristic_type):
+
+    playable_locations = possible_drop_locations(board)
+
+    # Check if game is over or not
+    is_four, winner = check_win_state(board)
+
+    if depth == 0 or is_four:
+        # if game over
+        if is_four:
+
+            if winner == PLAYER_2:
+                return (None, float("inf"))
+
+            elif winner == PLAYER_1:
+                return (None, float("-inf"))
+            else:
+                # no winner , return 0 score
+                return (None, 0)
+        else:
+            # heuristic selection part
+
+            #If depth equals 0 return evaluation score
+            if heuristic_type == "heuristic_1":
+                return (None, heuristic_1(board, PLAYER_2))
+            elif heuristic_type == "heuristic_2":
+                return (None, heuristic_2(board, PLAYER_2))
+            elif heuristic_type == "heuristic_3":
+                return (None, heuristic_3(board, PLAYER_2))
+
+            # return (None, heuristic_1(board, PLAYER_1))
+            #return (None, heuristic_2(board, AI))
+            #return (None, heuristic_3(board, AI))
+
+    if maximizingPlayer:
+        max_value = float("-inf")
+
+        # column = random.choice(playable_locations)
+        random.shuffle(playable_locations)
+
+        column = playable_locations[0]
+
+        for col in playable_locations:
+            row = get_row(board, col)
+
+            # Create a temp board
+            temp_board = board.copy()
+
+            # simulation
+            drop_piece(temp_board, row, col, PLAYER_2)
+
+            # until terminal or deepest board state
+            current_score = minimax_2(
+                temp_board, depth-1, False, heuristic_type)[1]
+
+            if current_score > max_value:
+                value = current_score
+                column = col
+
+        return column, value
+
+    else:
+        min_value = float("inf")
+
+        #column = random.choice(playable_locations)
+        random.shuffle(playable_locations)
+
+        for col in playable_locations:
+            row = get_row(board, col)
+
+            # Create a temp board
+            temp_board = board.copy()
+
+            # simulation
+            drop_piece(temp_board, row, col, PLAYER_1)
+
+            #until terminal or deepest board state
+            current_score = minimax_2(
+                temp_board, depth-1, True, heuristic_type)[1]
+
+            if current_score < min_value:
+                value = current_score
+                column = col
+        return column, value
+
+
 
 # HUMAN VS HUMAN
 def human_vs_human():
@@ -525,7 +588,7 @@ def human_vs_human():
             if is_playable(board, col):
                 row = get_row(board, col)
                 drop_piece(board, row, col, 1)
-                win_state,piece=check_winner(board)
+                win_state,piece=check_win_state(board)
                 if win_state and piece==1:                    
                     celebrate_winner(board, turn)                    
                     is_game_over=True
@@ -538,7 +601,7 @@ def human_vs_human():
             if is_playable(board, col):
                 row = get_row(board, col)
                 drop_piece(board, row, col, 2)
-                win_state,piece=check_winner(board)
+                win_state,piece=check_win_state(board)
                 if win_state and piece==2:                    
                     celebrate_winner(board, turn)                    
                     is_game_over=True
@@ -578,11 +641,11 @@ def human_vs_ai():
 
             if is_playable(board, col):
                 row = get_row(board, col)
-                drop_piece(board, row, col, 1)
-                win_state, piece = check_winner(board)
+                drop_piece(board, row, col, PLAYER_1)
+                win_state, piece = check_win_state(board)
                 turn = 1
-                if win_state and piece==1:                      
-                    celebrate_winner(board,1)                    
+                if win_state and piece==PLAYER_1:                      
+                    celebrate_winner(board,PLAYER_1)                    
                     is_game_over=True
             else:
                 print("Invalid move! Please try again.")
@@ -591,15 +654,16 @@ def human_vs_ai():
             # AI turn
             print("AI turn")
             
-            col, minimax_score = minimax(board, depth, True, heuristic_AI)
+            col, minimax_score = minimax_2(board, depth, True, heuristic_AI)
 
             if is_playable(board, col):
                 row = get_row(board, col)
-                drop_piece(board, row, col, 2)
+                drop_piece(board, row, col, PLAYER_2)
                 turn = 0
-                win_state,piece = check_winner(board)
-                if win_state and piece==2:
-                    celebrate_winner(board, 2)                    
+
+                win_state,piece = check_win_state(board)
+                if win_state and piece==PLAYER_2:
+                    celebrate_winner(board, PLAYER_2)                    
                     is_game_over=True
 
         print_board(board) 
@@ -636,11 +700,11 @@ def ai_vs_ai():
 
             if is_playable(board, col):
                 row = get_row(board, col)
-                drop_piece(board, row, col, 1)
+                drop_piece(board, row, col, PLAYER_1)
                 turn = 1
-                win_state,piece = check_winner(board)
-                if win_state and piece==1:
-                    celebrate_winner(board, 1)                    
+                win_state,piece = check_win_state(board)
+                if win_state and piece==PLAYER_1:
+                    celebrate_winner(board, PLAYER_1)                    
                     is_game_over=True
 
         #  player 2 (AI) turn
@@ -648,15 +712,15 @@ def ai_vs_ai():
             # AI turn
             print("AI 2 turn")
             
-            col, minimax_score = minimax(board, depth, True, heuristic_AI_2)
+            col, minimax_score = minimax_2(board, depth, True, heuristic_AI_2) # AI 2 is max player
 
             if is_playable(board, col):
                 row = get_row(board, col)
-                drop_piece(board, row, col, 2)
+                drop_piece(board, row, col, PLAYER_2)
                 turn = 0
-                win_state,piece = check_winner(board)
-                if win_state and piece==2:
-                    celebrate_winner(board, 2)                    
+                win_state,piece = check_win_state(board)
+                if win_state and piece==PLAYER_2:
+                    celebrate_winner(board, PLAYER_2)                    
                     is_game_over=True
 
         print_board(board)
@@ -667,10 +731,26 @@ def ai_vs_ai():
 
 def main():
 
-    # after testing all functions below , create a menu for user to select game mode
-    #human_vs_human()
-    human_vs_ai()
-    #ai_vs_ai()
+    print("Welcome to Connect 4 game!")
+    print("1. Human vs Human")
+    print("2. Human vs AI")
+    print("3. AI vs AI")
+    print("4. Exit")
+    
+    choice = int(input("Please select game mode: "))
+
+    if choice == 1:
+        human_vs_human()
+    elif choice == 2:
+        human_vs_ai()
+    elif choice == 3:
+        ai_vs_ai()
+    elif choice == 4:
+        print("Good bye!")
+    else:
+        print("Invalid choice! Please try again.")
+        main()
+
 
 if __name__ == "__main__":
     main()
