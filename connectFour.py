@@ -406,10 +406,10 @@ def check_win_state(board):
     is_win_2, player2 = check_winner(board, PLAYER_2)
 
     if is_win_1 and player1 == PLAYER_1:
-        print("Player 1 wins!")
+        
         return True, player1
     elif is_win_2 and player2 == PLAYER_2:
-        print("Player 2 wins!")
+        
         return True, player2
     else:
 
