@@ -27,6 +27,7 @@ python .\connectFour.py
 The complexity of the AI player can be configured by adjusting the number of plies (i.e., the depth of the tree) and the evaluation heuristic to be used. The available evaluation heuristics are:
 
 H1:
+
 Calcuates score of consequetive pieces of each player then returns the difference
 Calculates conseutives as 2, 3, 4 pieces for the player
 For 2 conseutive pieces, multiply number of occurence by 100
@@ -34,6 +35,7 @@ For 3 conseutive pieces, multiply number of occurence by 1000
 For 4 conseutive pieces, multiply number of occurence by 10000000000
 
 H2:
+
 Used weight matrix, score is added with the weight values of each index of the board for max player, and subtracted for min player
 
 Calculates score of consequetive pieces of each player then returns the difference to add to the score
