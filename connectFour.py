@@ -1,7 +1,14 @@
+''''
+CSE4082
+ASSIGNMENT 2
+
+Emine Çığ - 150118012
+Ahsen Yağmur Kahyaoğlu - 150119788
+
+'''
+
 import numpy
 import random
-
-import sys
 import math
 
 
@@ -10,33 +17,29 @@ PLAYER_2 = 2
 COL_COUNT = 8
 ROW_COUNT = 7
 
-
-def create_board():  # create_game_board
-    # Create board and fill positions with zeros
+# create board, fill with zeros
+def create_board():  
     board = numpy.zeros((ROW_COUNT, COL_COUNT), dtype=int)
     return board
 
-
-def drop_piece(board, row, col, piece):     # drop_piece
-    #play game
+# drop piece to the board for the player
+def drop_piece(board, row, col, piece):  
     board[row][col] = piece
 
-
-def is_playable(board, col):    # playable_location_control
-    # if location is 0 this means it is valid
+# check if the location is valid, if it is playable value is 0
+def is_playable(board, col): 
+    
     isPlayable = board[ROW_COUNT-1][col] == 0
     return isPlayable
 
-
+# get the appropriate row for the column
 def get_row(board, col):
 
     for row in range(ROW_COUNT):
         if board[row][col] == 0:
             return row
 
-# flips the board to drop all piaces to the bottom
-
-
+# flips the board to drop all piaces to the bottom, then prints the board
 def print_board(board):
     print("-------------------")
     temp = numpy.flip(board, 0).copy()
@@ -49,7 +52,7 @@ def print_board(board):
     print("  0 1 2 3 4 5 6 7")
     print("")
 
-
+# return not full columns numbers as a list to play
 def possible_drop_locations(board):
     playable_locations = []
     for col in range(COL_COUNT):
@@ -57,42 +60,31 @@ def possible_drop_locations(board):
             playable_locations.append(col)
     return playable_locations
 
-# check the game is won or not, give different name to this function
 
-
+# function checks if there is a winner with four connected pieces on the board for the player,
+#  looks for vertical, horizontal , diagonal four, inverse diagonal four
+# if there is a winner, returns True, winner piece, otherwise returns False, -1
 def check_winner(board, piece):
 
     # vertical four check
     for col in range(COL_COUNT):
         for row in range(ROW_COUNT-3):
             if board[row][col] == piece and board[row+1][col] == piece and board[row+2][col] == piece and board[row+3][col] == piece:
-                #print("vertical four check ", piece)
-                #print_board(board)
-                #print("............")
                 return True, piece
     # horizontal four check
     for col in range(COL_COUNT-3):
         for row in range(ROW_COUNT):
             if board[row][col] == piece and board[row][col+1] == piece and board[row][col+2] == piece and board[row][col+3] == piece:
-               # print("horizontal four check", piece)
-               # print_board(board)
-               # print("............")
                 return True, piece
     # pozitive diagonal four check
     for col in range(COL_COUNT-3):
         for row in range(ROW_COUNT-3):
             if board[row][col] == piece and board[row+1][col+1] == piece and board[row+2][col+2] == piece and board[row+3][col+3] == piece:
-               #print("pozitive diagonal four check",   piece)
-               #print_board(board)
-               #print("............")
                 return True, piece
     # negative diagonal four check
     for col in range(COL_COUNT-3):
         for row in range(3, ROW_COUNT):
             if board[row][col] == piece and board[row-1][col+1] == piece and board[row-2][col+2] == piece and board[row-3][col+3] == piece:
-               # print("negative diagonal four check",   piece)
-               # print_board(board)
-               # print("............")
                 return True, piece
 
     if len(possible_drop_locations(board)) <= 0:
@@ -100,20 +92,14 @@ def check_winner(board, piece):
     else:
         return False, -1
 
-# change turn function
-
-
+# change turn for the player
 def change_turn(turn):
     turn += 1
-    turn = turn % 2  # for which player is turn
-
-    #print("current turn:",turn)
+    turn = turn % 2     
 
     return turn
 
 # funtion for celebrating the winner
-
-
 def celebrate_winner(board, turn):
     print_board(board)
     print("***************")
@@ -121,14 +107,11 @@ def celebrate_winner(board, turn):
     print("***************")
 
 # return name of the player
-
-
 def get_player_name(turn):
     if turn == 0:
         return "Player 1 "
     else:
         return "Player 2 "
-
 
 # check input bound
 def check_input_bound(col):
@@ -137,7 +120,7 @@ def check_input_bound(col):
     else:
         return True
 
-
+# get input from the player with appropriate message
 def get_human_input(turn):
     while True:
         col = int(input("Your turn "+get_player_name(turn) +
@@ -148,7 +131,7 @@ def get_human_input(turn):
 
             print("\nInvalid input! Please try again.\n")
 
-
+# created a weight matrix, each index value represents how many consequtive four can be created totol for each direction (multiplied by 10)
 weight_matrix = [
     [30, 40, 50, 70, 60, 50, 40, 30],
     [40, 60, 80, 100, 100, 80, 60, 40],
@@ -159,18 +142,15 @@ weight_matrix = [
     [30, 40, 50, 70, 60, 50, 40, 30],
 ]
 
-
+# calculates conseutives as 2, 3, 4 pieces for the player 
+# for 2 conseutive pieces, multiply number of occurence by 100
+# for 3 conseutive pieces, multiply number of occurence by 1000
+# for 4 conseutive pieces, multiply number of occurence by 10000000000
 def calculate_consequtives_score(board, piece):
 
     score = 0
 
-    #print("heuristic_1")
-    # steps
-
-    # step 1 ---------------------------------------------------------------------
-    # calculate 1 pieces exist not consequtive, multiply number of occurence by 10
-
-    not_connected_pieces = 0
+    #not_connected_pieces = 0
     not_connected_pieces_indexes = []
     two_connected_pieces_indexes = []
     three_connected_pieces_indexes = []
@@ -298,7 +278,7 @@ def calculate_consequtives_score(board, piece):
 
     return score, not_connected_pieces_indexes, two_connected_pieces_indexes, three_connected_pieces_indexes
 
-
+# returns the other player piece
 def other_player(piece):
     players = {1, 2}
     other_piece = -1
@@ -308,7 +288,8 @@ def other_player(piece):
             other_piece = player
     return other_piece
 
-
+# heuristic function 1
+# Calcuates score of consequetive pieces of each player then returns the difference
 def heuristic_1(board, piece):
 
     other_piece = other_player(piece)
@@ -320,7 +301,9 @@ def heuristic_1(board, piece):
 
     return score
 
-
+# heuristic function 2
+# Used weight matrix, score is added with the weight values of each index of the board for max player, and subtracted for min player
+# Calculates score of consequetive pieces of each player then returns the difference to add to the score
 def heuristic_2(board, piece):
 
     score = 0
@@ -341,8 +324,10 @@ def heuristic_2(board, piece):
     return score
 
 # heuristic function 3
-
-
+# Calculates score of consequetive pieces  and the consequtive starting index lists for each consequetive type for each player
+# check the center score of each consequetive type list if it not empty and add it to the score for the max player
+# check the center score of each consequetive type list if it not empty and subtract it from the score for the min player
+# get the difference between the max player score and the min player score to return it
 def heuristic_3(board, piece):
 
     other_piece = other_player(piece)
@@ -372,8 +357,8 @@ def heuristic_3(board, piece):
     score = max_player_score-min_player_score
     return score
 
-
-# gets tuple list as input and return the center score
+#  if consecutive peices are in the center of the board for column 3, 4 and row 3 
+#  give extra score depend on power of number of consecutive pieces
 def get_center_score(connect_pieces_indexes, num_of_pieces):
     center_score = 0
     extra_score = pow(10, num_of_pieces)
@@ -385,7 +370,7 @@ def get_center_score(connect_pieces_indexes, num_of_pieces):
             center_score += extra_score
     return center_score
 
-
+# function to select heuristic function from user, returns the function name as string
 def select_heuristic():
     while True:
         heuristic = int(input("Select heuristic function (1-3): "))
@@ -399,7 +384,8 @@ def select_heuristic():
         else:
             print("Invalid input! Please try again.")
 
-
+#  check there is a consecutive 4 pieces in the board for each player with calling check_winner function
+# return True if there is a winner with the winner player piece
 def check_win_state(board):
 
     is_win_1, player1 = check_winner(board, PLAYER_1)
@@ -414,9 +400,9 @@ def check_win_state(board):
     else:
 
         return False, 0
-# minimax algorithm
 
-
+# minimax alpha-beta pruning algorithm
+# created from the pseudocode in the lecture slides, implemented heuristic function parameter and the max player
 def minimax(board, depth, maximizingPlayer, heuristic_type, alpha, beta,max_player):
 
     playable_locations = possible_drop_locations(board)
@@ -454,7 +440,7 @@ def minimax(board, depth, maximizingPlayer, heuristic_type, alpha, beta,max_play
             elif heuristic_type == "heuristic_3":
                 return (None, heuristic_3(board, max_player))
 
-            # return (None, heuristic_1(board, PLAYER_1))
+            #return (None, heuristic_1(board, PLAYER_1))
             #return (None, heuristic_2(board, AI))
             #return (None, heuristic_3(board, AI))
 
@@ -514,9 +500,7 @@ def minimax(board, depth, maximizingPlayer, heuristic_type, alpha, beta,max_play
                 break
         return column, value
 
-# minimax algorithm
-
-
+# second minimax alpha-beta pruning algorithm to other player can play as max player
 def minimax_2(board, depth, maximizingPlayer, heuristic_type, alpha, beta,max_player):
     # get other player
     other_player = 0
@@ -611,10 +595,10 @@ def minimax_2(board, depth, maximizingPlayer, heuristic_type, alpha, beta,max_pl
             beta = min(beta, current_score)
             if beta <= alpha:
                 break
+            
         return column, value
 
-
-
+# ---------------- GAME TYPES ----------------
 # HUMAN VS HUMAN
 def human_vs_human():
     board = create_board()
@@ -658,8 +642,6 @@ def human_vs_human():
         turn = change_turn(turn)
 
 # HUMAN VS AI
-
-
 def human_vs_ai():
     board = create_board()
     is_game_over = False
@@ -720,14 +702,13 @@ def human_vs_ai():
     print("---------------------------")
     print("Number of moves: ", number_of_moves, "\nDept: ",
           depth, "\nheuristic of AI 1: ", heuristic_AI)
+          
 # AI VS AI
-
-
 def ai_vs_ai():
     board = create_board()
     is_game_over = False
     turn = 0
-    depth = 4
+    depth = 2
     # select heuristic type
 
     heuristic_AI_1 = select_heuristic()
@@ -791,7 +772,7 @@ def ai_vs_ai():
 
 
 def main():
-
+    # main menu
     print("Welcome to Connect 4 game!")
     print("1. Human vs Human")
     print("2. Human vs AI")
